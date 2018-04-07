@@ -42,7 +42,10 @@ def sakura(msg):
         p = bin(i)[2:]
         label = (j_prev - len(p)) * '0' + p
         D.update({M[i] : label})
-    m_cur = 2
+    if m_prev == 2**(j_prev - 1):
+        m_cur = 0
+    else:
+        m_cur = 2
     # Указатель позиции для добавления элемента в словарь:
     pointer = 2**(j_prev-1)
     # Проверка на избежание коллизий меток:
