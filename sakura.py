@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from Crypto.Hash import keccak
-
+from time import clock
 
 def sakura(msg):
     # Внутренняя функция RawSHAKE128 для построения древовидного режима (Keccak[c=256)(M||11))
@@ -31,17 +31,17 @@ def sakura(msg):
         else:
             return m_tree(sub_t)
 
-    B = 4  # Как выбрать B?
+    B = 128
     M = [msg[i:i+B] for i in range(0, len(msg), B)]
+    S = []
     l = 0
-    D = {}
     m_prev = len(M)
     j_prev = len(bin(m_prev)[2:])
     # Простановка первых нескольких меток:
     for i in range(0, 2**(j_prev-1)):
         p = bin(i)[2:]
         label = (j_prev - len(p)) * '0' + p
-        D.update({M[i] : label})
+        S.append(label)
     if m_prev == 2**(j_prev - 1):
         m_cur = 0
     else:
@@ -65,20 +65,20 @@ def sakura(msg):
                 label = '1' * l + (j_cur - len(p)) * '0' + p
                 if (len(checker) <= len(label)) and (l > 1):
                     label = '1' * l + (j_cur - len(p) - 1) * '0' + p
-            D.update({M[pointer]: label})
+            S.append(label)
             index += 1
             if pointer + 1 < len(M):
                 pointer += 1
         checker = M[pointer - 1]
         m_prev = m_cur
-        j_prev = j_cur
-
-    for k, v in D.items():
-        print(k, ':', v)
-    return m_tree(list(D.keys()))
+        j_prev = j_cur 
+    return m_tree(list(dict(zip(S, M)).values()))
 
 
-if __name__ == "__main__":
-    test = "Курсовая работа, теория информации (Тимохин Илья СКБ151)"
-    print("Result is: ", sakura(test))
-
+ct = clock()
+m = "kljxvcxjvopdgodmfopkokljxvcxjvvkodfdpbjvpocjbpdkvopxkvkcopopdgod" \
+    "mfopkopdkvopxkvkcopvkxcovkopbjvpocjbpgfdgdfvopvkxcofkopbfjvpocgg"*2**15
+print(len(m))
+s = sakura(m)
+print(clock() - ct)
+print(s)
